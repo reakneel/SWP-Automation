@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import asdict
+
 from fastapi import APIRouter
 
 from modules.resource.services import ResourceRepository
@@ -7,6 +9,15 @@ from modules.resource.services import ResourceRepository
 router = APIRouter(prefix="/api/v1/resources", tags=["resources"])
 
 
-@router.get("")
-async def list_resources(repository: ResourceRepository) -> list[dict]:
-    return [resource.__dict__ for resource in await repository.list()]
+class ResourceAPI:
+    def __init__(self, repository: ResourceRepository) -> None:
+        self.repository = repository
+
+    def router(self) -> APIRouter:
+        router = APIRouter(prefix="/api/v1/resources", tags=["resources"])
+
+        @router.get("")
+        async def list_resources() -> list[dict]:
+            return [asdict(resource) for resource in await self.repository.list()]
+
+        return router
