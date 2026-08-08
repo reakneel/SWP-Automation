@@ -1,54 +1,53 @@
 # SWP Automation
 
-A modular Python automation platform for scheduled jobs, reminders, resource updates, monitoring, and external integrations.
+A modular Python automation platform for resource updates, daily jobs, reminders, monitoring, and external agent integrations.
 
 ## Architecture
 
 ```text
-CLI / API / OpenClaw
+OpenClaw / Web / CLI
+        |
+        v
+   Automation API
         |
         v
    Task Registry
         |
-   Automation Core
-   |    |      |
- Event Scheduler Worker
-   |    |      |
-   +----+------+----> Modules / Integrations
+        v
+      Worker
+        |
+  +-----+-----+----------------+
+  |           |                |
+resource     daily          reminder
+  |           |                |
+  +-----------+----------------+
+              |
+          Event Bus
+              |
+     Notification / Storage
 ```
 
-The core deliberately keeps business modules independent. OpenClaw is intended to be an optional command layer rather than the owner of business logic.
+## Core principles
 
-## Initial modules
-
-- `resource`: resource update and synchronization tasks
-- `daily`: routine tasks
-- `reminder`: reminders and notifications
-- `monitoring`: health and change monitoring
+- Business modules are isolated from scheduling and transport concerns.
+- Tasks expose a stable async execution contract.
+- Plugins register tasks without changing the core runtime.
+- Scheduler implementations are replaceable.
+- Notification channels are replaceable.
+- OpenClaw is an optional control plane; it is not the business logic layer.
 
 ## Development
 
 ```bash
-python -m venv .venv
-# Windows: .venv\\Scripts\\activate
-# Unix: source .venv/bin/activate
-pip install -e '.[all]'
+python -m pip install -e '.[dev,api,scheduler,storage]'
 pytest
 ruff check .
 ```
 
-## CLI
+## API
 
 ```bash
-automation task list
-automation task run example.hello
+uvicorn apps.api.main:app --reload
 ```
 
-## Design principles
-
-1. Deterministic business logic stays in Python modules.
-2. Tasks are independently executable and observable.
-3. Scheduling is separated from task implementation.
-4. Events are used for loose coupling between modules.
-5. External channels are integrations, not business logic.
-6. OpenClaw can call the API/CLI without becoming a hard dependency.
+Health check: `GET /health`
