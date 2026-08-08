@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import traceback
 from uuid import uuid4
 
@@ -8,6 +9,11 @@ from core.task.base import TaskContext
 from core.task.execution import ExecutionRecord, ExecutionStatus
 from core.task.registry import TaskRegistry
 from core.task.store import ExecutionStore
+
+
+class TaskCompletedEvent:
+    def __init__(self, record: ExecutionRecord) -> None:
+        self.record = record
 
 
 class TaskExecutor:
@@ -30,7 +36,7 @@ class TaskExecutor:
             run_id=run_id,
             task_name=task_name,
             status=ExecutionStatus.RUNNING,
-            started_at=__import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+            started_at=datetime.now(timezone.utc),
         )
         self.store.add(record)
         context = TaskContext(run_id=run_id, metadata=metadata or {})
@@ -45,12 +51,5 @@ class TaskExecutor:
             record.finish_failure(f"{exc}\n{traceback.format_exc()}")
 
         if self.event_bus is not None:
-            await self.event_bus.publish(
-                "task.completed",
-                {
-                    "run_id": record.run_id,
-                    "task_name": record.task_name,
-                    "status": record.status.value,
-                },
-            )
+            await self.event_bus.publish(TaskCompletedEvent(record))
         return record
