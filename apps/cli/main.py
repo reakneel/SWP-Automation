@@ -5,6 +5,7 @@ from pathlib import Path
 
 import typer
 
+from core.migration.cli import migrate_inventory, validate_inventory
 from core.migration.pipeline import MigrationPipeline
 from core.task.registry import TaskRegistry
 from core.worker.executor import TaskExecutor
@@ -62,34 +63,35 @@ def generate_migration(
     output: Path = typer.Option(Path("plugins"), "--output", "-o"),
 ) -> None:
     """Generate reviewable, disabled adapters from an inventory JSON file."""
-    import json
-
-    from core.migration.inventory import (
-        InventoryItem,
-        MigrationCategory,
-        MigrationStatus,
-    )
-
-    raw_items = json.loads(source.read_text(encoding="utf-8"))
-    items = [
-        InventoryItem(
-            name=item["name"],
-            source=item["source"],
-            entrypoint=item.get("entrypoint"),
-            category=MigrationCategory(item.get("category", "unknown")),
-            status=MigrationStatus(item.get("status", "discovered")),
-            schedule=item.get("schedule"),
-            side_effects=item.get("side_effects", []),
-            dependencies=item.get("dependencies", []),
-            notes=item.get("notes", ""),
-            metadata=item.get("metadata", {}),
-        )
-        for item in raw_items
-    ]
-    generated = MigrationPipeline().generate_adapters(items, output)
+    generated = migrate_inventory(source, output)
     typer.echo(f"Generated {len(generated)} reviewable adapters")
     for path in generated:
         typer.echo(path)
+
+
+@migration_app.command("validate")
+def validate_migration(
+    inventory: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+    source: Path = typer.Option(Path("."), "--source", "-s"),
+) -> None:
+    """Validate inventory readiness without importing or executing legacy code."""
+    errors = validate_inventory(inventory, source)
+    if errors:
+        for error in errors:
+            typer.echo(error, err=True)
+        raise typer.Exit(code=1)
+    typer.echo("Migration inventory is ready")
+
+
+@migration_app.command("migrate")
+def migrate_migration(
+    inventory: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+    output: Path = typer.Option(Path("plugins"), "--output", "-o"),
+) -> None:
+    """Generate disabled adapters from an inventory for human review."""
+    generated = migrate_inventory(inventory, output)
+    typer.echo(f"Generated {len(generated)} disabled adapters")
+    typer.echo("Review and wire legacy callables before enabling them")
 
 
 if __name__ == "__main__":
