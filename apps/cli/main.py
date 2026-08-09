@@ -47,8 +47,8 @@ def run_task(name: str) -> None:
 
 @migration_app.command("scan")
 def scan_migration(
-    source: Path = typer.Argument(..., exists=True, file_okay=False, readable=True),
-    output: Path = typer.Option(Path("migration"), "--output", "-o"),
+    source: Path = typer.Argument(..., exists=True, file_okay=False, readable=True),  # noqa: B008
+    output: Path = typer.Option(Path("migration"), "--output", "-o"),  # noqa: B008
 ) -> None:
     """Scan a legacy project without importing or executing it."""
     items = MigrationPipeline().export(source, output)
@@ -59,8 +59,8 @@ def scan_migration(
 
 @migration_app.command("generate")
 def generate_migration(
-    source: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
-    output: Path = typer.Option(Path("plugins"), "--output", "-o"),
+    source: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),  # noqa: B008
+    output: Path = typer.Option(Path("plugins"), "--output", "-o"),  # noqa: B008
 ) -> None:
     """Generate reviewable, disabled adapters from an inventory JSON file."""
     generated = migrate_inventory(source, output)
@@ -71,8 +71,8 @@ def generate_migration(
 
 @migration_app.command("validate")
 def validate_migration(
-    inventory: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
-    source: Path = typer.Option(Path("."), "--source", "-s"),
+    inventory: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),  # noqa: B008
+    source: Path = typer.Option(Path("."), "--source", "-s"),  # noqa: B008
 ) -> None:
     """Validate inventory readiness without importing or executing legacy code."""
     errors = validate_inventory(inventory, source)
@@ -85,8 +85,8 @@ def validate_migration(
 
 @migration_app.command("migrate")
 def migrate_migration(
-    inventory: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
-    output: Path = typer.Option(Path("plugins"), "--output", "-o"),
+    inventory: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),  # noqa: B008
+    output: Path = typer.Option(Path("plugins"), "--output", "-o"),  # noqa: B008
 ) -> None:
     """Generate disabled adapters from an inventory for human review."""
     generated = migrate_inventory(inventory, output)
