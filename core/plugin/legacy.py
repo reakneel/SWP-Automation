@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 from collections.abc import Callable
 from typing import Any
 
@@ -23,7 +24,8 @@ class LegacyFunctionTask(Task):
         self.kwargs = kwargs
 
     async def run(self, context: TaskContext) -> TaskResult:
-        result = self.function(**self.kwargs)
-        if asyncio.iscoroutine(result):
-            result = await result
+        if inspect.iscoroutinefunction(self.function):
+            result = await self.function(**self.kwargs)
+        else:
+            result = await asyncio.to_thread(self.function, **self.kwargs)
         return TaskResult.ok("legacy task completed", result=result)
