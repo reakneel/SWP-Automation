@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 
@@ -35,9 +35,9 @@ class ExecutionRecord:
         self.status = ExecutionStatus.SUCCESS
         self.message = message
         self.data = data or {}
-        self.finished_at = datetime.now(timezone.utc)
+        self.finished_at = datetime.now(UTC)
 
     def finish_failure(self, error: str) -> None:
         self.status = ExecutionStatus.FAILED
         self.error = error
-        self.finished_at = datetime.now(timezone.utc)
+        self.finished_at = datetime.now(UTC)
