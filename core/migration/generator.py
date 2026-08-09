@@ -22,6 +22,23 @@ def generate_task(item: InventoryItem, output_dir: Path) -> Path:
         raise FileExistsError(destination)
 
     source = item.source.replace("\\", "/")
-    content = f'''from pathlib import Path\n\nfrom core.plugin.legacy import LegacyFunctionTask\n\n\n# TODO: import the legacy callable from the source project.\n# from {source[:-3].replace('/', '.')} import {item.entrypoint}\n\n\ndef build_task() -> LegacyFunctionTask:\n    raise NotImplementedError(\n        "Wire {item.entrypoint} from {source} before enabling this task"\n    )\n'''
+    source_module = source[:-3].replace("/", ".")
+    content = "\n".join(
+        [
+            '"""Generated reviewable adapter; wire the legacy callable before enabling."""',
+            "",
+            "from core.plugin.legacy import LegacyFunctionTask",
+            "",
+            "",
+            f"# TODO: from {source_module} import {item.entrypoint}",
+            "",
+            "",
+            "def build_task() -> LegacyFunctionTask:",
+            "    raise NotImplementedError(",
+            f'        "Wire {item.entrypoint} from {source} before enabling this task"',
+            "    )",
+            "",
+        ]
+    )
     destination.write_text(content, encoding="utf-8")
     return destination
