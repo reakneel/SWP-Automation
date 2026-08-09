@@ -15,7 +15,11 @@ jobs:
           python-version: "3.12"
       - name: Install
         run: pip install -e ".[api,scheduler,storage,redis,dev]"
-      - name: Ruff
+      - name: Ruff format
+        run: ruff format .
+      - name: Ruff check and fix
+        run: ruff check . --fix
+      - name: Ruff check
         run: ruff check .
       - name: Tests
         run: pytest
