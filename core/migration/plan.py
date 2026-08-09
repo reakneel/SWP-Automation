@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from core.migration.inventory import InventoryItem, MigrationStatus
+from core.migration.generator import safe_module_name
+from core.migration.inventory import InventoryItem
 from core.migration.validator import validate_item
 
 
@@ -24,15 +25,11 @@ def build_plan(
     plan: list[MigrationPlanItem] = []
     for item in items:
         result = validate_item(item, source_root)
-        enabled = result.ready and item.status in {
-            MigrationStatus.CLASSIFIED,
-            MigrationStatus.WRAPPED,
-        }
         plan.append(
             MigrationPlanItem(
                 name=item.name,
                 source=item.source,
-                output=output_root / f"{item.name}.py",
+                output=output_root / f"{safe_module_name(item.name)}.py",
                 enabled=False,
                 reasons=tuple(result.reasons) if not result.ready else (),
             )
