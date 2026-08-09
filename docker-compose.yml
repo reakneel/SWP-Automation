@@ -40,7 +40,7 @@ services:
 
   worker:
     build: .
-    command: ["automation", "worker"]
+    command: ["python", "-m", "apps.worker.main"]
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://automation:automation@postgres:5432/automation}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
@@ -52,7 +52,7 @@ services:
 
   scheduler:
     build: .
-    command: ["automation", "scheduler"]
+    command: ["python", "-m", "apps.scheduler.main"]
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://automation:automation@postgres:5432/automation}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
