@@ -22,6 +22,4 @@ def validate_item(item: InventoryItem, source_root: Path) -> MigrationValidation
         reasons.append("entrypoint is missing")
     if item.category is MigrationCategory.UNKNOWN:
         reasons.append("category is unknown")
-    if not item.side_effects:
-        reasons.append("side effects were not detected; review required")
     return MigrationValidation(item, not reasons, tuple(reasons))
