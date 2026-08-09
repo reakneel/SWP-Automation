@@ -9,6 +9,7 @@ from core.migration.inventory import InventoryItem, build_inventory_item
 _HTTP_IMPORTS = {"requests", "httpx", "aiohttp", "urllib", "urllib3"}
 _DB_IMPORTS = {"sqlalchemy", "psycopg", "asyncpg", "sqlite3", "pymysql", "redis"}
 _NOTIFICATION_IMPORTS = {"telegram", "discord", "slack"}
+_SKIP_DIRECTORIES = {".venv", "venv", "__pycache__", ".git", "node_modules"}
 
 
 class LegacyScanner:
@@ -37,7 +38,7 @@ class LegacyScanner:
     def scan_directory(self, root: Path) -> list[InventoryItem]:
         items: list[InventoryItem] = []
         for path in sorted(root.rglob("*.py")):
-            if any(part in {".venv", "venv", "__pycache__", ".git", "node_modules"} for part in path.parts):
+            if any(part in _SKIP_DIRECTORIES for part in path.parts):
                 continue
             try:
                 items.extend(self.scan_file(path, root))
@@ -67,7 +68,8 @@ class LegacyScanner:
         for node in ast.walk(tree):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
                 if node.func.id in {"open", "print"}:
-                    effects.add("filesystem" if node.func.id == "open" else "stdout")
+                    effect = "filesystem" if node.func.id == "open" else "stdout"
+                    effects.add(effect)
                 if node.func.id in {"system", "popen"}:
                     effects.add("subprocess")
         return sorted(effects)
