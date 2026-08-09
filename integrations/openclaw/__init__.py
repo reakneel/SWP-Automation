@@ -1,0 +1,5 @@
+"""OpenClaw integration boundary."""
+
+from .adapter import OpenClawAdapter
+
+__all__ = ["OpenClawAdapter"]
