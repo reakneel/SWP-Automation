@@ -26,12 +26,19 @@ class ExecutionRecord:
     error: str | None = None
 
     @property
+    def success(self) -> bool:
+        """Return whether this execution completed successfully."""
+        return self.status is ExecutionStatus.SUCCESS
+
+    @property
     def duration_ms(self) -> float | None:
         if self.finished_at is None:
             return None
         return (self.finished_at - self.started_at).total_seconds() * 1000
 
-    def finish_success(self, message: str = "", data: dict[str, Any] | None = None) -> None:
+    def finish_success(
+        self, message: str = "", data: dict[str, Any] | None = None
+    ) -> None:
         self.status = ExecutionStatus.SUCCESS
         self.message = message
         self.data = data or {}
