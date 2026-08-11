@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 
-class PluginState(str, Enum):
+class PluginState(StrEnum):
     DISCOVERED = "discovered"
     LOADED = "loaded"
     INITIALIZED = "initialized"
