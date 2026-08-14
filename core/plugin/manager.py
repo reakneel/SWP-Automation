@@ -73,17 +73,26 @@ class PluginManager:
                 raise PluginLoadError(f"plugin startup failed for {name}: {exc}") from exc
 
     async def load_from_paths(self, paths: list[Path]) -> list[Plugin]:
-        """Discover manifests under paths; isolate failures so one bad plugin does not abort the batch."""
+        """Discover packages under paths; isolate failures so one bad plugin does not abort the batch."""
         report = await self.load_from_paths_report(paths)
         return report.loaded
 
     async def load_from_paths_report(self, paths: list[Path]) -> PluginLoadReport:
+        """Discover packages, resolve dependency order, load with per-package isolation."""
         report = PluginLoadReport()
-        for manifest_path in self.loader.discover(paths):
+        try:
+            index, parse_failures = self.loader.discover_packages_report(paths)
+            report.failed.extend(parse_failures)
+            packages = index.ordered()
+        except Exception as exc:
+            report.failed.append(("package-index", str(exc)))
+            return report
+
+        for package in packages:
             try:
-                plugin, manifest = self.loader.load_manifest(manifest_path)
+                plugin, manifest = self.loader.load_package(package)
             except Exception as exc:
-                report.failed.append((str(manifest_path), str(exc)))
+                report.failed.append((package.name, str(exc)))
                 continue
 
             if self.plugin_registry.get(manifest.name) is None:
