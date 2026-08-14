@@ -1,0 +1,7 @@
+name: reminder
+version: 0.1.0
+category: business
+entrypoint:
+  module: modules.reminder.plugin
+  class: ReminderPlugin
+permissions: []

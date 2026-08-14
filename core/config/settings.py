@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,6 +10,7 @@ class Settings(BaseSettings):
     app_name: str = "swp-automation"
     environment: str = "development"
     log_level: str = "INFO"
+    plugin_paths: list[str] = Field(default_factory=lambda: ["modules"])
 
     model_config = SettingsConfigDict(
         env_prefix="SWP_",
