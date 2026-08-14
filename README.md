@@ -2,7 +2,7 @@
 
 A modular Python automation platform for resource updates, daily jobs, reminders, monitoring, and external agent integrations.
 
-> **Status:** M3 Production Runtime complete. M4 focuses on migrating existing standalone Python scripts into plugins.
+> **Status:** M5 plugin platform accepted (M5.1–M5.5). Next: M5.6 Plugin Package Layer.
 
 ## What this project is
 
@@ -87,7 +87,6 @@ A minimal plugin:
 from core.plugin.base import Plugin, PluginMetadata
 from core.task.base import Task, TaskContext, TaskResult
 
-
 class ExampleTask(Task):
     name = "example.run"
     description = "Run the example automation."
@@ -95,7 +94,6 @@ class ExampleTask(Task):
     async def run(self, context: TaskContext) -> TaskResult:
         result = await do_something()
         return TaskResult.ok("completed", result=result)
-
 
 class ExamplePlugin(Plugin):
     metadata = PluginMetadata(
@@ -136,7 +134,7 @@ class LegacyUpdateTask(Task):
 
 Then register the task through a plugin. Scheduler, retry, timeout, persistence, events, and notifications remain owned by the platform.
 
-See [`docs/PLUGIN_GUIDE.md`](docs/PLUGIN_GUIDE.md) and [`docs/PLUGIN_TEMPLATE.md`](docs/PLUGIN_TEMPLATE.md).
+See [docs/PLUGIN_GUIDE.md](docs/PLUGIN_GUIDE.md) and [docs/PLUGIN_TEMPLATE.md](docs/PLUGIN_TEMPLATE.md).
 
 ## Plugin rules
 
@@ -192,7 +190,11 @@ redis     -> events / coordination
 - **M1 — Core Runtime:** task/plugin/event/execution foundations — complete
 - **M2 — Business Modules:** resource/daily/reminder — complete
 - **M3 — Production Runtime:** persistence/scheduler/worker/Redis/Docker/OpenClaw — complete
-- **M4 — Legacy Migration:** migrate existing standalone Python projects into plugins
+- **M4 — Legacy Migration:** migrate existing standalone Python projects into plugins — complete
+- **M5 — Plugin Platform:** contract, loader, runtime integration, execution safety — complete ([PROJECT_ACCEPTANCE](docs/PROJECT_ACCEPTANCE.md))
+- **M5.6 — Plugin Package Layer:** versioned packages, dependencies, install paths — next
+- **M5.7 — Distributed Runtime**
+- **M5.8 — Enterprise Automation Platform**
 
 ## License
 
