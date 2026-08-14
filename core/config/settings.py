@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     app_name: str = "swp-automation"
     environment: str = "development"
     log_level: str = "INFO"
-    plugin_paths: list[str] = Field(default_factory=lambda: ["modules"])
-    plugin_module_prefixes: list[str] = Field(default_factory=lambda: ["modules."])
+    plugin_paths: list[str] = Field(default_factory=lambda: ["modules", "packages"])
+    plugin_module_prefixes: list[str] = Field(default_factory=lambda: ["modules.", "packages."])
     plugin_strict_permissions: bool = False
     execution_timeout_seconds: float = 300.0
     metadata_max_keys: int = 64

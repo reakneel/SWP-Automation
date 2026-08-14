@@ -18,3 +18,4 @@ class PluginManifest(BaseModel):
     category: str
     entrypoint: PluginEntrypoint
     permissions: list[str] = Field(default_factory=list)
+    dependencies: list[str] = Field(default_factory=list)
