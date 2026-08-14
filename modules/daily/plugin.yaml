@@ -6,3 +6,4 @@ entrypoint:
   class: DailyPlugin
 permissions:
   - task.execute
+dependencies: []
