@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     execution_timeout_seconds: float = 300.0
     metadata_max_keys: int = 64
     metadata_max_value_length: int = 4096
+    redis_url: str | None = None
+    task_queue_key: str = "automation:tasks"
+    worker_id: str = "worker-1"
+    worker_poll_timeout: float = 1.0
 
     model_config = SettingsConfigDict(
         env_prefix="SWP_",
