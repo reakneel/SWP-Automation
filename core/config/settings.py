@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     environment: str = "development"
     log_level: str = "INFO"
     plugin_paths: list[str] = Field(default_factory=lambda: ["modules"])
+    plugin_module_prefixes: list[str] = Field(default_factory=lambda: ["modules."])
+    plugin_strict_permissions: bool = False
+    execution_timeout_seconds: float = 300.0
+    metadata_max_keys: int = 64
+    metadata_max_value_length: int = 4096
 
     model_config = SettingsConfigDict(
         env_prefix="SWP_",

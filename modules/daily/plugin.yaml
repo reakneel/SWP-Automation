@@ -4,4 +4,5 @@ category: business
 entrypoint:
   module: modules.daily.plugin
   class: DailyPlugin
-permissions: []
+permissions:
+  - task.execute
