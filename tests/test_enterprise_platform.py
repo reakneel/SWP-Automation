@@ -34,9 +34,7 @@ def test_rate_limiter_blocks_after_limit() -> None:
 
 
 def test_audit_log_filters_by_tenant() -> None:
-    platform = EnterprisePlatform.from_settings(
-        Settings(api_keys=[], rate_limit_per_minute=100, audit_max_events=100)
-    )
+    platform = EnterprisePlatform.from_settings(Settings(api_keys=[], rate_limit_per_minute=100, audit_max_events=100))
     platform.audit_task_run(
         TenantContext(tenant_id="a", actor="u1"),
         task_name="x.run",
@@ -72,9 +70,7 @@ class PingTask(Task):
 def test_api_run_records_audit_and_tenant(monkeypatch: pytest.MonkeyPatch) -> None:
     from apps.api import main as api_main
 
-    api_main.enterprise = EnterprisePlatform.from_settings(
-        Settings(api_keys=[], rate_limit_per_minute=1000)
-    )
+    api_main.enterprise = EnterprisePlatform.from_settings(Settings(api_keys=[], rate_limit_per_minute=1000))
     rt = AutomationRuntime.create()
     rt.registry.register(PingTask())
     monkeypatch.setattr(api_main, "runtime", rt)
@@ -84,7 +80,7 @@ def test_api_run_records_audit_and_tenant(monkeypatch: pytest.MonkeyPatch) -> No
         "/api/v1/tasks/enterprise.ping/run",
         json={"metadata": {}, "tenant_id": "acme", "actor": "alice"},
     )
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     body = response.json()
     assert body["status"] == "success"
     assert body["tenant_id"] == "acme"
