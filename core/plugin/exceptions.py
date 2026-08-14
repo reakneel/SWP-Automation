@@ -11,3 +11,7 @@ class PluginLoadError(PluginError):
 
 class PluginConfigError(PluginError):
     """Raised when plugin configuration is invalid."""
+
+
+class PluginPermissionError(PluginError):
+    """Raised when plugin permissions are invalid or insufficient."""

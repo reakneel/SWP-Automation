@@ -4,19 +4,31 @@ from pathlib import Path
 
 import yaml
 
+from core.config.settings import get_settings
 from core.plugin.base import Plugin
 from core.plugin.discovery import PluginDiscovery
 from core.plugin.exceptions import PluginConfigError, PluginLoadError
 from core.plugin.importer import PluginImporter
 from core.plugin.manifest import PluginManifest
+from core.plugin.permissions import is_module_allowed, validate_permissions
 
 
 class PluginLoader:
     """Discover, parse, import, and instantiate plugins from manifests."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        module_prefixes: list[str] | None = None,
+        strict_permissions: bool | None = None,
+    ) -> None:
+        settings = get_settings()
         self.discovery = PluginDiscovery()
         self.importer = PluginImporter()
+        self.module_prefixes = module_prefixes if module_prefixes is not None else list(settings.plugin_module_prefixes)
+        self.strict_permissions = (
+            strict_permissions if strict_permissions is not None else settings.plugin_strict_permissions
+        )
 
     def discover(self, paths: list[Path]) -> list[Path]:
         return self.discovery.discover(paths)
@@ -36,9 +48,25 @@ class PluginLoader:
             raise PluginConfigError(f"manifest must be a mapping: {path}")
 
         try:
-            return PluginManifest.model_validate(raw)
+            manifest = PluginManifest.model_validate(raw)
         except Exception as exc:
             raise PluginConfigError(f"invalid plugin manifest: {path}: {exc}") from exc
+
+        if not is_module_allowed(manifest.entrypoint.module, self.module_prefixes):
+            raise PluginLoadError(
+                f"entrypoint module not allowed: {manifest.entrypoint.module} "
+                f"(allowed prefixes: {', '.join(self.module_prefixes)})"
+            )
+
+        try:
+            manifest.permissions = validate_permissions(
+                manifest.permissions,
+                strict=self.strict_permissions,
+            )
+        except Exception as exc:
+            raise PluginConfigError(f"invalid permissions in {path}: {exc}") from exc
+
+        return manifest
 
     def instantiate(self, manifest: PluginManifest) -> Plugin:
         try:
