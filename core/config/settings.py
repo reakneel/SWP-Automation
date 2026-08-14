@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     task_queue_key: str = "automation:tasks"
     worker_id: str = "worker-1"
     worker_poll_timeout: float = 1.0
+    api_keys: list[str] = Field(default_factory=list)
+    rate_limit_per_minute: int = 120
+    audit_max_events: int = 5000
 
     model_config = SettingsConfigDict(
         env_prefix="SWP_",
