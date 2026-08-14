@@ -10,11 +10,12 @@ from core.plugin.discovery import PluginDiscovery
 from core.plugin.exceptions import PluginConfigError, PluginLoadError
 from core.plugin.importer import PluginImporter
 from core.plugin.manifest import PluginManifest
+from core.plugin.package import PackageIndex, PluginPackage, resolve_load_order
 from core.plugin.permissions import is_module_allowed, validate_permissions
 
 
 class PluginLoader:
-    """Discover, parse, import, and instantiate plugins from manifests."""
+    """Discover, parse, import, and instantiate plugins from manifests and packages."""
 
     def __init__(
         self,
@@ -25,7 +26,9 @@ class PluginLoader:
         settings = get_settings()
         self.discovery = PluginDiscovery()
         self.importer = PluginImporter()
-        self.module_prefixes = module_prefixes if module_prefixes is not None else list(settings.plugin_module_prefixes)
+        self.module_prefixes = (
+            module_prefixes if module_prefixes is not None else list(settings.plugin_module_prefixes)
+        )
         self.strict_permissions = (
             strict_permissions if strict_permissions is not None else settings.plugin_strict_permissions
         )
@@ -68,6 +71,44 @@ class PluginLoader:
 
         return manifest
 
+    def discover_packages(self, paths: list[Path]) -> PackageIndex:
+        """Parse manifests under paths; skip invalid packages (caller may log failures)."""
+        packages: list[PluginPackage] = []
+        for manifest_path in self.discover(paths):
+            try:
+                manifest = self.parse_manifest(manifest_path)
+            except Exception:
+                continue
+            packages.append(
+                PluginPackage(
+                    root=manifest_path.parent.resolve(),
+                    manifest_path=manifest_path.resolve(),
+                    manifest=manifest,
+                )
+            )
+        return PackageIndex(packages=packages)
+
+    def discover_packages_report(
+        self, paths: list[Path]
+    ) -> tuple[PackageIndex, list[tuple[str, str]]]:
+        """Like discover_packages but also returns parse failures."""
+        packages: list[PluginPackage] = []
+        failed: list[tuple[str, str]] = []
+        for manifest_path in self.discover(paths):
+            try:
+                manifest = self.parse_manifest(manifest_path)
+            except Exception as exc:
+                failed.append((str(manifest_path), str(exc)))
+                continue
+            packages.append(
+                PluginPackage(
+                    root=manifest_path.parent.resolve(),
+                    manifest_path=manifest_path.resolve(),
+                    manifest=manifest,
+                )
+            )
+        return PackageIndex(packages=packages), failed
+
     def instantiate(self, manifest: PluginManifest) -> Plugin:
         try:
             plugin_cls = self.load_class(manifest.entrypoint.module, manifest.entrypoint.class_name)
@@ -95,8 +136,14 @@ class PluginLoader:
         plugin = self.instantiate(manifest)
         return plugin, manifest
 
+    def load_package(self, package: PluginPackage) -> tuple[Plugin, PluginManifest]:
+        plugin = self.instantiate(package.manifest)
+        return plugin, package.manifest
+
     def load_from_paths(self, paths: list[Path]) -> list[tuple[Plugin, PluginManifest]]:
+        index = self.discover_packages(paths)
+        ordered = resolve_load_order(index.packages)
         results: list[tuple[Plugin, PluginManifest]] = []
-        for manifest_path in self.discover(paths):
-            results.append(self.load_manifest(manifest_path))
+        for package in ordered:
+            results.append(self.load_package(package))
         return results
