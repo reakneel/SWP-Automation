@@ -1,0 +1,7 @@
+name: daily
+version: 0.1.0
+category: business
+entrypoint:
+  module: modules.daily.plugin
+  class: DailyPlugin
+permissions: []
