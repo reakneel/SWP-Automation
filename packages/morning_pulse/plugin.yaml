@@ -1,0 +1,10 @@
+name: morning_pulse
+version: 0.1.0
+category: workflow
+entrypoint:
+  module: packages.morning_pulse.morning_pulse.plugin
+  class: MorningPulsePlugin
+permissions:
+  - task.execute
+  - network.http
+dependencies: []
