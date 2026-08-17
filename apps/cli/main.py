@@ -94,5 +94,55 @@ def migrate_migration(
     typer.echo("Review and wire legacy callables before enabling them")
 
 
+plugin_app = typer.Typer(help="Scaffold and check package plugins (optional AI)")
+app.add_typer(plugin_app, name="plugin")
+
+
+@plugin_app.command("docs")
+def plugin_docs() -> None:
+    """List plugin authoring documents used by the agent."""
+    from integrations.ai.context import list_plugin_docs
+
+    for item in list_plugin_docs():
+        typer.echo(f"{item['path']}\texists={item['exists']}\tbytes={item['bytes']}")
+
+
+@plugin_app.command("check")
+def plugin_check(
+    path: Path = typer.Argument(..., exists=True, file_okay=False, readable=True),  # noqa: B008
+) -> None:
+    """Validate a package plugin directory (yaml, permissions, entrypoint class)."""
+    from integrations.ai.check import check_plugin_package
+
+    result = check_plugin_package(path)
+    for w in result.warnings:
+        typer.echo(f"warning: {w}")
+    if result.errors:
+        for e in result.errors:
+            typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(code=1)
+    typer.echo(f"ok\t{result.info.get('name')}\t{result.path}")
+
+
+@plugin_app.command("scaffold")
+def plugin_scaffold(
+    name: str = typer.Argument(..., help="Plugin package name (snake_case)"),
+    brief: str = typer.Option("", "--brief", "-b", help="Short description / intent"),
+    write: bool = typer.Option(False, "--write", help="Write files (default is dry-run)"),
+    llm: bool = typer.Option(False, "--llm", help="Use OpenAI-compatible LLM when SWP_AI_API_KEY is set"),
+) -> None:
+    """Scaffold a package plugin (template offline; optional --llm)."""
+    from integrations.ai.scaffold import scaffold_plugin
+
+    result = scaffold_plugin(name=name, brief=brief, dry_run=not write, use_llm=llm)
+    typer.echo(f"plugin={result.plugin_name}\tmode={result.mode}\tdry_run={result.dry_run}")
+    for err in result.errors:
+        typer.echo(f"note: {err}", err=True)
+    for f in result.files:
+        typer.echo(f"{f['action']}\t{f['path']}\t{f['bytes']}B")
+    if result.errors and not result.files:
+        raise typer.Exit(code=1)
+
+
 if __name__ == "__main__":
     app()
