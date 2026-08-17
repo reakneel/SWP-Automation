@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     api_keys: list[str] = Field(default_factory=list)
     rate_limit_per_minute: int = 120
     audit_max_events: int = 5000
+    ai_api_key: str | None = None
+    ai_base_url: str | None = "https://api.x.ai/v1"
+    ai_model: str | None = "grok-3"
 
     model_config = SettingsConfigDict(
         env_prefix="SWP_",

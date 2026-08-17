@@ -1,0 +1,1 @@
+"""Installable plugin packages namespace."""

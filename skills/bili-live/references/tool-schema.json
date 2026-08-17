@@ -1,0 +1,55 @@
+{
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "bili_room_check",
+        "description": "Check Bilibili live room status (live/offline, title, uid).",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "room": { "type": "string", "description": "Room id, short id, or live URL" },
+            "cookie": { "type": "string", "description": "Optional cookie string" }
+          },
+          "required": ["room"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "bili_stream_url",
+        "description": "Resolve a playable stream URL for a live room.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "room": { "type": "string" },
+            "qn": { "type": "integer", "default": 10000 },
+            "cookie": { "type": "string" }
+          },
+          "required": ["room"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "bili_record_segment",
+        "description": "Record a time-bounded live segment (ffmpeg). Prefer dry_run unless user asks to save.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "room": { "type": "string" },
+            "qn": { "type": "integer", "default": 10000 },
+            "max_seconds": { "type": "number", "default": 60 },
+            "format": { "type": "string", "enum": ["flv", "mp4", "ts"], "default": "flv" },
+            "output": { "type": "string", "default": "downloads" },
+            "dry_run": { "type": "boolean", "default": true },
+            "cookie": { "type": "string" }
+          },
+          "required": ["room"]
+        }
+      }
+    }
+  ]
+}

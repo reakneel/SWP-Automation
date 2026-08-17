@@ -1,0 +1,11 @@
+name: bili_live_rec
+version: 0.1.0
+category: media
+entrypoint:
+  module: packages.bili_live_rec.bili_live_rec.plugin
+  class: BiliLiveRecPlugin
+permissions:
+  - task.execute
+  - net.http
+  - fs.write
+dependencies: []
