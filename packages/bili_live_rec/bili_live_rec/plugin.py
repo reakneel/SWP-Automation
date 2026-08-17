@@ -8,7 +8,7 @@ import requests
 from core.plugin.base import Plugin, PluginMetadata
 from core.task.base import Task, TaskContext, TaskResult
 from packages.bili_live_rec.bili_live_rec.recorder import record_once, sanitize_filename
-from packages.bili_live_rec.bili_live_rec.room import BiliRoomClient, QN_NAME
+from packages.bili_live_rec.bili_live_rec.room import QN_NAME, BiliRoomClient
 
 
 def _session_client(metadata: dict) -> BiliRoomClient:

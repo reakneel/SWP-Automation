@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import asyncio
+import re
 import shutil
 from pathlib import Path
 from typing import Any
-import re
 
 from packages.bili_live_rec.bili_live_rec.wbi import UA
 
