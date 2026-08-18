@@ -1,0 +1,11 @@
+name: password_keeper
+version: 0.1.0
+category: security
+entrypoint:
+  module: packages.password_keeper.password_keeper.plugin
+  class: PasswordKeeperPlugin
+permissions:
+  - task.execute
+  - fs.read
+  - fs.write
+dependencies: []
