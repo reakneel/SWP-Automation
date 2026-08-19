@@ -1,0 +1,12 @@
+name: bili_to_youtube
+version: 0.1.0
+category: workflow
+entrypoint:
+  module: packages.bili_to_youtube.bili_to_youtube.plugin
+  class: BiliToYoutubePlugin
+permissions:
+  - task.execute
+  - net.http
+  - fs.read
+  - fs.write
+dependencies: []
